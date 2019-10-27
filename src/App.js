@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import './App.css';
+import axios from 'axios';
 
 function Todo({ todo, index, completeTodo, removeTodo }) {
   return (
@@ -29,23 +30,28 @@ function TodoForm({ addTodo }) {
 }
 
 function App() {
-  const [todos, setTodos] = useState([
-    {
-      text: "Learn React",
-      isCompleted: false
-    },
-    {
-      text: "Meet Friend",
-      isCompleted: false
-    },
-    {
-      text: "Build Cool App",
-      isCompleted: false
-    }
-  ]);
+  const [todos, setTodos] = useState([]);
+
+  //use for the side effects such as displaying data from API
+  useEffect(() => {
+    axios.get('https://reactclientpanel-7b847.firebaseio.com/todos.json')
+      .then(result => {
+        console.log(result.data)
+        const todoArray = [];
+        const todoData = result.data;
+        for (const key in todoData) {
+          todoArray.push(todoData[key].todo)
+        }
+        setTodos(todoArray[0])
+      })
+  }, []);
+
   const addTodo = text => {
     const NewTodos = [...todos, { text }];
     setTodos(NewTodos);
+    axios.post('https://reactclientpanel-7b847.firebaseio.com/todos.json', { todo: NewTodos })
+      .then(resp => console.log(resp.data))
+      .catch(err => console.log(err))
   };
   const completeTodo = index => {
     const CompleteTodo = [...todos];
